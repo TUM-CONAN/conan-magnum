@@ -1,33 +1,24 @@
-[![Download](https://api.bintray.com/packages/helmesjo/public-conan/magnum%3Ahelmesjo/images/download.svg) ](https://bintray.com/helmesjo/public-conan/magnum%3Ahelmesjo/_latestVersion)
-[![Build Status Travis](https://travis-ci.org/helmesjo/conan-magnum.svg?branch=stable%2F2018.10)](https://travis-ci.org/helmesjo/conan-magnum)
-[![Build Status AppVeyor](https://ci.appveyor.com/api/projects/status/github/helmesjo/conan-magnum?branch=stable%2F2018.10&svg=true)](https://ci.appveyor.com/project/helmesjo/conan-magnum)
-
 ## Conan package recipe for [*magnum*](https://magnum.graphics)
 
 Magnum — Lightweight and modular C++11/C++14                     graphics middleware for games and data visualization
 
-The packages generated with this **conanfile** can be found on [Bintray](https://bintray.com/helmesjo/public-conan/magnum%3Ahelmesjo).
+The packages generated with this **conanfile** can be found on [CampAR](https://conan.campar.in.tum.de/artifactory/webapp/#/home).
 
 
 ## Issues
-
-If you wish to report an issue or make a request for a Bincrafters package, please do so here:
-
-[Bincrafters Community Issues](https://github.com/bincrafters/community/issues)
-
 
 ## For Users
 
 ### Basic setup
 
-    $ conan install magnum/2018.10@helmesjo/stable
+    $ conan install magnum/2019.01@camposs/stable
 
 ### Project setup
 
 If you handle multiple dependencies in your project is better to add a *conanfile.txt*
 
     [requires]
-    magnum/2018.10@helmesjo/stable
+    magnum/2019.01@camposs/stable
 
     [generators]
     cmake
@@ -94,7 +85,7 @@ The following command both runs all the steps of the conan file, and publishes t
 
 ## Add Remote
 
-    $ conan remote add helmesjo "https://api.bintray.com/conan/helmesjo/public-conan"
+    $ conan remote add camposs "https://conan.campar.in.tum.de/api/conan/conan-camposs"
 
 
 ## Conan Recipe License
@@ -102,4 +93,4 @@ The following command both runs all the steps of the conan file, and publishes t
 NOTE: The conan recipe license applies only to the files of this recipe, which can be used to build and package magnum.
 It does *not* in any way apply or is related to the actual software being packaged.
 
-[MIT](https://github.com/helmesjo/conan-magnum/blob/stable/2018.10/LICENSE.md)
+[MIT](https://github.com/ulricheck/conan-corrade/blob/stable/2018.10/LICENSE.md)

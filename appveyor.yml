@@ -3,11 +3,11 @@ build: false
 environment:
     PYTHON: "C:\\Python37"
 
-    CONAN_USERNAME: "helmesjo"
-    CONAN_LOGIN_USERNAME: "helmesjo"
+    CONAN_USERNAME: "camposs"
+    CONAN_LOGIN_USERNAME: "camposs"
     CONAN_CHANNEL: "stable" # because of bug in conan-package-tools, we always upload packages as stable
-    CONAN_UPLOAD: "https://api.bintray.com/conan/helmesjo/public-conan"
-    CONAN_REMOTES: "https://api.bintray.com/conan/helmesjo/public-conan,https://api.bintray.com/conan/bincrafters/public-conan"
+    CONAN_UPLOAD: "https://conan.campar.in.tum.de/api/conan/conan-camposs"
+    CONAN_REMOTES: "https://conan.campar.in.tum.de/api/conan/conan-camposs,https://api.bintray.com/conan/bincrafters/public-conan"
     CONAN_UPLOAD_ONLY_WHEN_STABLE: 0
 
     CONAN_TOTAL_PAGES: 2

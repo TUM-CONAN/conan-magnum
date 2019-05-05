@@ -22,14 +22,14 @@ def sort_libs(correct_order, libs, lib_suffix='', reverse_result=False):
 
 class LibnameConan(ConanFile):
     name = "magnum"
-    version = "2018.10"
+    version = "2019.01"
     description =   "Magnum — Lightweight and modular C++11/C++14 \
                     graphics middleware for games and data visualization"
     # topics can get used for searches, GitHub topics, Bintray tags etc. Add here keywords about the library
     topics = ("conan", "corrade", "graphics", "rendering", "3d", "2d", "opengl")
-    url = "https://github.com/helmesjo/conan-magnum"
+    url = "https://github.com/ulricheck/conan-magnum"
     homepage = "https://magnum.graphics"
-    author = "helmesjo <helmesjo@gmail.com>"
+    author = "ulrich eck (forked on github)"
     license = "MIT"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
@@ -95,7 +95,7 @@ class LibnameConan(ConanFile):
         "with_distancefieldconverter": False,
         "with_eglcontext": False,
         "with_fontconverter": False,
-        "with_glfwapplication": False,
+        "with_glfwapplication": True,
         "with_glxapplication": False,
         "with_glxcontext": False,
         "with_gl_info": False,
@@ -107,7 +107,7 @@ class LibnameConan(ConanFile):
         "with_opengltester": False,
         "with_primitives": True,
         "with_scenegraph": True,
-        "with_sdl2application": True,
+        "with_sdl2application": False,
         "with_shaders": True,
         "with_text": True,
         "with_tgaimageconverter": False,
@@ -124,7 +124,7 @@ class LibnameConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     requires = (
-        "corrade/2018.10@helmesjo/stable"
+        "corrade/2019.01@camposs/stable"
     )
 
     def system_package_architecture(self):
@@ -194,7 +194,7 @@ class LibnameConan(ConanFile):
         if self.options.with_sdl2application:
             self.requires("sdl2/2.0.9@bincrafters/stable")
         if self.options.with_glfwapplication:
-            self.requires("glfw/3.2.1.20180327@bincrafters/stable")
+            self.requires("glfw/3.2.1@camposs/stable")
 
     def source(self):
         source_url = "https://github.com/mosra/magnum"
@@ -203,6 +203,10 @@ class LibnameConan(ConanFile):
 
         # Rename to "source_subfolder" is a convention to simplify later steps
         os.rename(extracted_dir, self._source_subfolder)
+
+        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum GLFW::GLFW)",
+            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum CONAN_PKG::glfw)")
 
     def _configure_cmake(self):
         cmake = CMake(self)
