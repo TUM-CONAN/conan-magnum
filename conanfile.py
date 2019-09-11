@@ -77,6 +77,7 @@ class LibnameConan(ConanFile):
         "with_wavaudioimporter": [True, False],
         "with_windowlesswglapplication": [True, False],
         "with_windowlesseglapplication": [True, False],
+        "with_windowlesscglapplication": [True, False],
         "with_windowlessglxapplication": [True, False],
         "with_xeglapplication": [True, False],
     }
@@ -119,6 +120,7 @@ class LibnameConan(ConanFile):
         "with_wavaudioimporter": False,
         "with_windowlesswglapplication": False,
         "with_windowlesseglapplication": False,
+        "with_windowlesscglapplication": False,
         "with_windowlessglxapplication": False,
         "with_xeglapplication": False,
     }
@@ -270,6 +272,7 @@ class LibnameConan(ConanFile):
             "MagnumSdl2Application",
             "MagnumWindowlessSdl2Application",
             "MagnumWindowlessWglApplication",
+            "MagnumWindowlessCglApplication",
             #4
             "MagnumDebugTools",
             "MagnumOpenGLTester",
