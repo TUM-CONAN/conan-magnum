@@ -200,7 +200,7 @@ class LibnameConan(ConanFile):
         if self.options.with_sdl2application:
             self.requires("sdl2/2.0.9@bincrafters/stable")
         if self.options.with_glfwapplication:
-            self.requires("glfw/3.2.1@camposs/stable")
+            self.requires("glfw/3.3@camposs/stable")
 
     def source(self):
         source_url = "https://github.com/mosra/magnum"
