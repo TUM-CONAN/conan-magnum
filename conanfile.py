@@ -22,7 +22,7 @@ def sort_libs(correct_order, libs, lib_suffix='', reverse_result=False):
 
 class LibnameConan(ConanFile):
     name = "magnum"
-    version = "2019.01"
+    version = "2020.06"
     description =   "Magnum — Lightweight and modular C++11/C++14 \
                     graphics middleware for games and data visualization"
     # topics can get used for searches, GitHub topics, Bintray tags etc. Add here keywords about the library
@@ -130,7 +130,7 @@ class LibnameConan(ConanFile):
     _build_subfolder = "build_subfolder"
 
     requires = (
-        "corrade/2019.01@camposs/stable"
+        "corrade/2020.06@camposs/stable"
     )
 
     def system_package_architecture(self):
@@ -211,8 +211,8 @@ class LibnameConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
         tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
-            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum GLFW::GLFW)",
-            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum CONAN_PKG::glfw)")
+            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum GLFW::GLFW",
+            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum CONAN_PKG::glfw")
 
     def _configure_cmake(self):
         cmake = CMake(self)
