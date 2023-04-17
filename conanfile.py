@@ -198,7 +198,7 @@ class LibnameConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sdl2application:
-            self.requires("sdl2/2.0.9@bincrafters/stable")
+            self.requires("sdl2/2.0.20")
         if self.options.with_glfwapplication:
             self.requires("glfw/3.3@camposs/stable")
 
