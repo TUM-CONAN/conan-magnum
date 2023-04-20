@@ -1,8 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from conans import ConanFile, CMake, tools
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.scm import Git
+from conan.tools.files import load, update_conandata, copy, collect_libs, get, replace_in_file
+from conan.tools.microsoft.visual import check_min_vs
+from conan.tools.system.package_manager import Apt
 import os
+
 
 def sort_libs(correct_order, libs, lib_suffix='', reverse_result=False):
     # Add suffix for correct string matching
@@ -20,21 +26,20 @@ def sort_libs(correct_order, libs, lib_suffix='', reverse_result=False):
 
     return result
 
+
 class LibnameConan(ConanFile):
     name = "magnum"
     version = "2020.06"
-    description =   "Magnum — Lightweight and modular C++11/C++14 \
-                    graphics middleware for games and data visualization"
+    description = "Magnum — Lightweight and modular C++11/C++14 \
+                   graphics middleware for games and data visualization"
     # topics can get used for searches, GitHub topics, Bintray tags etc. Add here keywords about the library
     topics = ("conan", "corrade", "graphics", "rendering", "3d", "2d", "opengl")
-    url = "https://github.com/ulricheck/conan-magnum"
+    url = "https://github.com/TUM-CONAN/conan-magnum"
     homepage = "https://magnum.graphics"
     author = "ulrich eck (forked on github)"
-    license = "MIT"  # Indicates license type of the packaged library; please use SPDX Identifiers https://spdx.org/licenses/
+    license = "MIT"
     exports = ["LICENSE.md"]
     exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-    short_paths = True  # Some folders go out of the 260 chars path length scope (windows)
 
     # Options may need to change depending on the packaged library.
     settings = "os", "arch", "compiler", "build_type"
@@ -42,7 +47,6 @@ class LibnameConan(ConanFile):
         "shared": [True, False], 
         "fPIC": [True, False],
         "build_deprecated": [True, False],
-        "build_multithreaded": [True, False],
         "build_plugins_static": [True, False],
         "target_gl": [True, False],
         "target_gles": [True, False],
@@ -81,11 +85,11 @@ class LibnameConan(ConanFile):
         "with_windowlessglxapplication": [True, False],
         "with_xeglapplication": [True, False],
     }
+
     default_options = {
         "shared": False, 
         "fPIC": True,
         "build_deprecated": True,
-        "build_multithreaded": True,
         "build_plugins_static": False,
         "target_gl": True,
         "target_gles": False,
@@ -123,132 +127,107 @@ class LibnameConan(ConanFile):
         "with_windowlesscglapplication": False,
         "with_windowlessglxapplication": False,
         "with_xeglapplication": False,
+        "corrade/*:build_deprecated": True,
     }
 
-    # Custom attributes for Bincrafters recipe conventions
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-
-    requires = (
-        "corrade/2020.06@camposs/stable"
-    )
-
-    def system_package_architecture(self):
-        if tools.os_info.with_apt:
-            if self.settings.arch == "x86":
-                return ':i386'
-            elif self.settings.arch == "x86_64":
-                return ':amd64'
-            elif self.settings.arch == "armv6" or self.settings.arch == "armv7":
-                return ':armel'
-            elif self.settings.arch == "armv7hf":
-                return ':armhf'
-            elif self.settings.arch == "armv8":
-                return ':arm64'
-
-        if tools.os_info.with_yum:
-            if self.settings.arch == "x86":
-                return '.i686'
-            elif self.settings.arch == 'x86_64':
-                return '.x86_64'
-        return ""
-
     def system_requirements(self):
-        # Install required OpenGL stuff on linux
-        if tools.os_info.is_linux:
-            if tools.os_info.with_apt:
-                installer = tools.SystemPackageTool()
-
-                packages = []
-                if self.options.target_gl:
-                    packages.append("libgl1-mesa-dev")
-                if self.options.target_gles:
-                    packages.append("libgles1-mesa-dev")
-
-                arch_suffix = self.system_package_architecture()
-                for package in packages:
-                    installer.install("%s%s" % (package, arch_suffix))
-
-            elif tools.os_info.with_yum:
-                installer = tools.SystemPackageTool()
-
-                arch_suffix = self.system_package_architecture()
-                packages = []
-                if self.options.target_gl:
-                    packages.append("mesa-libGL-devel")
-                if self.options.target_gles:
-                    packages.append("mesa-libGLES-devel")
-
-                for package in packages:
-                    installer.install("%s%s" % (package, arch_suffix))
-            else:
-                self.output.warn("Could not determine package manager, skipping Linux system requirements installation.")
+        apt = Apt(self)
+        packages = []
+        if self.options.target_gl:
+            packages.append("libgl1-mesa-dev")
+        if self.options.target_gles:
+            packages.append("libgles1-mesa-dev")
+        missing = apt.check(packages)
+        if missing:
+            self.output.error("Warning: Missing system packages: {}".format(missing))
 
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
 
     def configure(self):
-        self.options['corrade'].add_option('build_deprecated', self.options.build_deprecated)
+        self.options['corrade']['build_deprecated'] = self.options.build_deprecated
 
         # To fix issue with resource management, see here:
         # https://github.com/mosra/magnum/issues/304#issuecomment-451768389
         if self.options.shared:
-            self.options['corrade'].add_option('shared', True)
+            self.options['corrade']['shared'] = True
 
     def requirements(self):
+        self.requires("corrade/2020.06@camposs/stable")
         if self.options.with_sdl2application:
             self.requires("sdl2/2.0.20")
         if self.options.with_glfwapplication:
-            self.requires("glfw/3.3@camposs/stable")
+            self.requires("glfw/3.3.8")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            check_min_vs(self, "141")
+
+    def export(self):
+        update_conandata(self, {"sources": {
+            "commit": "v{}".format(self.version),
+            "url": "https://github.com/mosra/magnum.git"
+            }}
+            )
 
     def source(self):
-        source_url = "https://github.com/mosra/magnum"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
-        extracted_dir = self.name + "-" + self.version
+        git = Git(self)
+        sources = self.conan_data["sources"]
+        git.clone(url=sources["url"], target=self.source_folder)
+        git.checkout(commit=sources["commit"])
+        # replace_in_file(os.path.join(self.source_folder, "src", "Magnum", "Platform", "CMakeLists.txt"),
+        #     "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum GLFW::GLFW",
+        #     "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum glfw::glfw")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "find_package(Corrade REQUIRED Utility)",
+            "cmake_policy(SET CMP0074 NEW)\nfind_package(Corrade REQUIRED Utility)")
 
-        # Rename to "source_subfolder" is a convention to simplify later steps
-        os.rename(extracted_dir, self._source_subfolder)
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "Platform", "CMakeLists.txt"),
-            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum GLFW::GLFW",
-            "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum CONAN_PKG::glfw")
-
-    def _configure_cmake(self):
-        cmake = CMake(self)
+    def generate(self):
+        tc = CMakeToolchain(self)
 
         def add_cmake_option(option, value):
             var_name = "{}".format(option).upper()
             value_str = "{}".format(value)
             var_value = "ON" if value_str == 'True' else "OFF" if value_str == 'False' else value_str 
-            cmake.definitions[var_name] = var_value
+            tc.variables[var_name] = var_value
 
         for option, value in self.options.items():
             add_cmake_option(option, value)
 
-        # Magnum uses suffix on the resulting 'lib'-folder when running cmake.install()
-        # Set it explicitly to empty, else Magnum might set it implicitly (eg. to "64")
+        # Corrade uses suffix on the resulting 'lib'-folder when running cmake.install()
+        # Set it explicitly to empty, else Corrade might set it implicitly (eg. to "64")
         add_cmake_option("LIB_SUFFIX", "")
 
         add_cmake_option("BUILD_STATIC", not self.options.shared)
         add_cmake_option("BUILD_STATIC_PIC", not self.options.shared and self.options.get_safe("fPIC"))
+        corrade_root = self.dependencies["corrade"].package_folder
+        self.output.info("Corrade ROOT: {}".format(corrade_root))
+        tc.variables["Corrade_ROOT"] = corrade_root
 
-        cmake.configure(build_folder=self._build_subfolder)
+        tc.generate()
 
-        return cmake
+        deps = CMakeDeps(self)
+        # deps.set_property("corrade", "cmake_find_mode", "none")
+        deps.set_property("glfw", "cmake_find_mode", "none")
+        deps.generate()
+
+    def layout(self):
+        cmake_layout(self, src_folder="source_subfolder")
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst="licenses", src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
         # See dependency order here: https://doc.magnum.graphics/magnum/custom-buildsystems.html
-        allLibs = [
+        all_libs = [
             #1
             "Magnum",
             "MagnumAnimation",
@@ -281,11 +260,11 @@ class LibnameConan(ConanFile):
         
         # Sort all built libs according to above, and reverse result for correct link order
         suffix = '-d' if self.settings.build_type == "Debug" else ''
-        builtLibs = tools.collect_libs(self)
-        self.cpp_info.libs = sort_libs(correct_order=allLibs, libs=builtLibs, lib_suffix=suffix, reverse_result=True)
+        built_libs = collect_libs(self)
+        self.cpp_info.libs = sort_libs(correct_order=all_libs, libs=built_libs, lib_suffix=suffix, reverse_result=True)
 
         if self.settings.os == "Windows":
-            if self.settings.compiler == "Visual Studio":
+            if self.settings.compiler == "msvc":
                 if not self.options.shared:
                     self.cpp_info.libs.append("OpenGL32.lib")
             else:
