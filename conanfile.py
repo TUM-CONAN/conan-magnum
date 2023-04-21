@@ -156,7 +156,7 @@ class LibnameConan(ConanFile):
     def requirements(self):
         self.requires("corrade/2020.06@camposs/stable")
         if self.options.with_sdl2application:
-            self.requires("sdl2/2.0.20")
+            self.requires("sdl/2.26.1")
         if self.options.with_glfwapplication:
             self.requires("glfw/3.3.8")
 
