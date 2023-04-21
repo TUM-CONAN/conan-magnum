@@ -1,12 +1,16 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(test_package)
+cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0074 NEW)
 
+project(test_package CXX)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-find_package(magnum CONFIG REQUIRED)
+set(CMAKE_MODULE_PATH "${Magnum_ROOT}/share/cmake/Magnum" ${CMAKE_MODULE_PATH})
+
+find_package(Magnum REQUIRED GL Shaders Primitives MeshTools Trade)
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} magnum::magnum)
+target_link_libraries(${PROJECT_NAME} PRIVATE Magnum::GL Magnum::Shaders Magnum::Trade Magnum::Primitives Magnum::MeshTools)
 
 set_target_properties(${PROJECT_NAME} 
     PROPERTIES 

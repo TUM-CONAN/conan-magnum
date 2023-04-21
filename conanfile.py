@@ -176,9 +176,6 @@ class LibnameConan(ConanFile):
         sources = self.conan_data["sources"]
         git.clone(url=sources["url"], target=self.source_folder)
         git.checkout(commit=sources["commit"])
-        # replace_in_file(os.path.join(self.source_folder, "src", "Magnum", "Platform", "CMakeLists.txt"),
-        #     "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum GLFW::GLFW",
-        #     "target_link_libraries(MagnumGlfwApplication PUBLIC Magnum glfw::glfw")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
             "find_package(Corrade REQUIRED Utility)",
             "cmake_policy(SET CMP0074 NEW)\nfind_package(Corrade REQUIRED Utility)")
@@ -202,13 +199,12 @@ class LibnameConan(ConanFile):
         add_cmake_option("BUILD_STATIC", not self.options.shared)
         add_cmake_option("BUILD_STATIC_PIC", not self.options.shared and self.options.get_safe("fPIC"))
         corrade_root = self.dependencies["corrade"].package_folder
-        self.output.info("Corrade ROOT: {}".format(corrade_root))
         tc.variables["Corrade_ROOT"] = corrade_root
 
         tc.generate()
 
         deps = CMakeDeps(self)
-        # deps.set_property("corrade", "cmake_find_mode", "none")
+        deps.set_property("corrade", "cmake_find_mode", "none")
         deps.set_property("glfw", "cmake_find_mode", "none")
         deps.generate()
 
