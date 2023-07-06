@@ -200,6 +200,9 @@ class LibnameConan(ConanFile):
         add_cmake_option("BUILD_STATIC", not self.options.shared)
         add_cmake_option("BUILD_STATIC_PIC", not self.options.shared and self.options.get_safe("fPIC"))
         corrade_root = self.dependencies["corrade"].package_folder
+        # on windows change to unix style path, as are all other paths
+        if self.settings.os == 'Windows':
+            corrade_root = corrade_root.replace('\\', '/')        
         tc.variables["Corrade_ROOT"] = corrade_root
 
         tc.generate()
