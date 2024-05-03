@@ -20,9 +20,9 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         corrade_root = self.dependencies["corrade"].package_folder
-        tc.variables["Corrade_ROOT"] = corrade_root
+        tc.variables["Corrade_ROOT"] = corrade_root.replace('\\', '/') 
         magnum_root = self.dependencies["magnum"].package_folder
-        tc.variables["Magnum_ROOT"] = magnum_root
+        tc.variables["Magnum_ROOT"] = magnum_root.replace('\\', '/') 
         tc.generate()
 
         deps = CMakeDeps(self)
