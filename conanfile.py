@@ -177,12 +177,16 @@ class LibnameConan(ConanFile):
         sources = self.conan_data["sources"]
         git.clone(url=sources["url"], target=self.source_folder)
         git.checkout(commit=sources["commit"])
+
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
             "find_package(Corrade REQUIRED Utility)",
             "cmake_policy(SET CMP0074 NEW)\nfind_package(Corrade REQUIRED Utility)")
+
         replace_in_file(self, os.path.join(self.source_folder, "modules", "FindGLFW.cmake"),
-            "elseif(MSVC_VERSION VERSION_LESS 1930)",
-            "elseif(MSVC_VERSION VERSION_LESS 1939)")
+            """set(_GLFW_LIBRARY_PATH_SUFFIX lib-vc2019)""",
+            """set(_GLFW_LIBRARY_PATH_SUFFIX lib-vc2019)
+        elseif(MSVC_VERSION VERSION_LESS 1940)
+            set(_GLFW_LIBRARY_PATH_SUFFIX lib-vc2022)""")
 
     def generate(self):
         tc = CMakeToolchain(self)
